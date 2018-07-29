@@ -72,6 +72,8 @@ It has managed to go incident free for over 30 miles multiple times with the max
 
 ![alt text][image2]
 
+There are occasional collision that happens when some other car changes lane to ego car lane. The prediction section needs to get better as it only predicts the position assuming it doesnt change lane. 
+
 ### Basic Build Instructions
 
 1. Clone this repo.
