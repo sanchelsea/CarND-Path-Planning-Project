@@ -284,6 +284,9 @@ int main() {
 				car_s = end_path_s;
 			}
 			
+			
+			//Prediction: Anaylizing the environment(other cars) around us 
+			
 			bool too_close = false;
             bool car_left_ahead = false;
             bool car_left_behind = false;
@@ -297,7 +300,6 @@ int main() {
 			double lane_right_avg_speed = 60.0;
 			double lane_current_avg_speed = 60.0;
 			
-			//FInd ref_vel to use
 			
 			for( int i =0; i< sensor_fusion.size(); i++)
 			{
@@ -376,6 +378,7 @@ int main() {
 			}
 			
 			 
+			//Behaviour Planning: Deciding what course of action to take.
 			
 			if ( too_close) 
 			{   
@@ -462,6 +465,9 @@ int main() {
                 }
 			}
 	  
+			
+			
+			//Trajectory Generation
 			
 			//Create a list of sparsely spaced waypoinys (x,y)
 			

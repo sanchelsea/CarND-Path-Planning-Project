@@ -1,6 +1,11 @@
 # CarND-Path-Planning-Project
 Self-Driving Car Engineer Nanodegree Program
    
+
+[//]: # (Image References)
+[image1]: ./examples/car1.png
+[image2]: ./examples/car2.png
+
 ### Simulator.
 You can download the Term3 Simulator which contains the Path Planning Project from the [releases tab (https://github.com/udacity/self-driving-car-sim/releases/tag/T3_v1.2).
 
@@ -12,7 +17,62 @@ Each waypoint in the list contains  [x,y,s,dx,dy] values. x and y are the waypoi
 
 The highway's waypoints loop around so the frenet s value, distance along the road, goes from 0 to 6945.554.
 
-## Basic Build Instructions
+## Reflection
+I started off with the provided code from the seed project and followed the instructions of Aaron Brown and David Silver for Trajectory generation. The code could be modularized and made more object oriented but for this project I stuck to having everything in the main.cpp.
+
+The code is divided into three sections:
+
+### Prediction [line 288 to line 377](./src/main.cpp#L288)
+
+The Prediction section deals with the telemetry and sensor fusion data. This helps us understand the environment (other vehicles) around us.  There are multiple aspects we calculate which will be used later for behaviour planning. 
+
+- Is there a car ahead of us blocking the traffic?
+- Is there a car to the left/right lane ahead of our car, making lane change safe? Here we use 30 meters from our current car position.  
+- Is there a car to the left/right lane behind our car, making lane change safe?  Here we use 5 meters from our current car position.  
+- Is there a speeding car from behind in the left/right lane?
+- What is the average speed of the cars in the left/right/current lane? Here we only consider cars 75 meters ahead of our current car position.
+
+Before calculating these we predict where each car's position will be at the end of the last planned trajectory.
+One thing to improve on would be to predict the lane the car would be. We do face occasional collision if the car performs a lane change to our car's lane. Need pointers on how to do it.
+
+### Behaviour [line 381 to line 466](./src/main.cpp#L381)
+
+The Behaviour section decides what course of action to take. 
+- Do we increase/decrease the speed?
+- Do we need to change lanes?
+
+The Prediction section helps us understand the environment we are in. We analyze if we need to change lanes and if we do then we understand if it is safe to make a left/right lane change. We use the metrics calculated from the sensor fusion data earlier to make these decisions. 
+
+The decision points are summarized below:
+- Is there a car ahead of us?
+	- If yes, can we change lanes left or right?
+		- If we can change to both lanes then we decide the lane based on the lane average speed.
+		- If change to only one lane is possible then do that.
+		- If no lane change is possible then reduce the speed of the car.		
+- If not, are we on the center lane? 
+	- If yes, then continue on the same lane and accelerate until we hit the speed limit.
+	- If not, then change to center lane.
+
+Based on these the car is able to handle situations where the car ahead is braking, make intelligent decisions on which lane to change. The car also positions itself in the center lane when possible as being in the center lane gives more options for optimized path generation. 
+Instead of the decision flow, we could create multiple cost functions and add weights to it and arrive at the final behaviour. Will attempt this once the code is made object oriented.
+
+### Trajectory Generation [line 470 to line 584](./src/main.cpp#L470)
+
+Trajectory Generation section calculates the trajectory based on the speed and lane output from the Behavior section, the car coordinates and the past path points. We use Spline library to do the polynomial fits as it easy to use and it is guaranteed to use all the points. Followed the lecture from Aaron Brown and David Silver for Trajectory generation.
+
+The simulator provides the previous path for every iteration. There trajectory is generated starting with the last two points of the previous trajectory.  If we dont have previous trajectory then we start with the current position, heading and velocity. We then add cars current location and the points 30 m and 60 m ahead and in the target lane.  
+
+These points are then fed to the spline for trajectory generation. To make the calculations easier, the coordinates are transformed to local car coordinates before being fed to spline. We also use all the points from the previous path that was not traversed by the car in the new trajectory to ensure continuity.
+
+### Conclusion
+The resulting path planner works well for this highway driving. It satifies the conditions in the rubic points.
+It has managed to go incident free for over 30 miles multiple times with the maximum of 52 miles. It also manages a average speed of 48.71 MPH during a run of over 30 miles. Images below. 
+
+![alt text][image1]
+
+![alt text][image2]
+
+### Basic Build Instructions
 
 1. Clone this repo.
 2. Make a build directory: `mkdir build && cd build`
